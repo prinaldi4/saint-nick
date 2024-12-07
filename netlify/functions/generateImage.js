@@ -1,19 +1,8 @@
-// netlify/functions/generateImage.js
-exports.handler = async function(event, context) {
-  // Enable CORS
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
-  };
+const fetch = require('node-fetch'); // Add this at the top
 
-  // Handle OPTIONS request (for CORS)
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: ''
-    };
+exports.handler = async function(event, context) {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
@@ -33,17 +22,25 @@ exports.handler = async function(event, context) {
     });
 
     const data = await response.json();
+    console.log('Bria Response:', data);
 
     return {
       statusCode: 200,
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
       body: JSON.stringify(data)
     };
   } catch (error) {
+    console.error('Error:', error);
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Failed to generate image' })
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
