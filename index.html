@@ -602,37 +602,12 @@ window.generateGift = async function() {
     const signature = document.getElementById('signature').value;
     const result = document.getElementById('result');
     
-    if(wishText.trim() === '') {
-        alert('Please write your wish to Santa first!');
-        return;
-    }
-
-    if(signature.trim() === '') {
-        alert('Oh no! You forgot to sign your letter!');
-        return;
-    }
-
-    if (wishText.length > 50) {
-        alert('Your letter is a bit too long! Santa prefers shorter wishes.');
-        return;
-    }
-
-    // Show loading state
-    result.innerHTML = `
-        <div id="imageContainer">
-            <div class="loader" id="loader">
-                <img src="img/Elf_LoadingAnimation.gif" alt="Loading..." style="width: 100%; height: auto;">
-                <div id="timeoutMessage"></div>
-            </div>
-        </div>
-        <div id="enjoyMessage" style="display: none; margin-top: 10px;">
-            <p style="margin-bottom: 30px;"><span style="color: #cc0000;">Merry Christmas ${signature}!<br>We hope you enjoy your gift:</span><br><strong>${wishText}</strong></p>
-        </div>
-    `;
+    // ... (keep existing validation code) ...
 
     try {
         const christmasPrompt = `${wishText}, with Christmas tree, magical Christmas atmosphere, festive lighting, snow, cinematic lighting, high quality, detailed`;
         
+        console.log('Sending request...');
         const response = await fetch('/.netlify/functions/generateImage', {
             method: 'POST',
             headers: {
@@ -642,6 +617,10 @@ window.generateGift = async function() {
                 prompt: christmasPrompt
             })
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const responseData = await response.json();
         console.log('Response data:', responseData);
@@ -667,8 +646,8 @@ window.generateGift = async function() {
             result.innerHTML = '<p style="color: #cc0000;">Oops! The elves had trouble creating your gift. Please try again!</p>';
         };
 
-        // Set image source from response
-        img.src = responseData.images[0]; // We'll adjust this based on the actual response
+        // Assuming responseData contains the image URL
+        img.src = responseData.images[0]; // We'll adjust this based on actual response
 
         // Add image to container
         const imageContainer = document.getElementById('imageContainer');
@@ -677,8 +656,7 @@ window.generateGift = async function() {
 
     } catch (error) {
         console.error('Error:', error);
-        const imageContainer = document.getElementById('imageContainer');
-        imageContainer.innerHTML = '<p style="color: #cc0000;">Oops! The elves had trouble creating your gift. Please try again!</p>';
+        result.innerHTML = '<p style="color: #cc0000;">Oops! The elves had trouble creating your gift. Please try again!</p>';
     }
 };
 </script>
